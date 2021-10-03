@@ -1,23 +1,33 @@
-import React from "react";
+ import React from "react";
 
 export default class EditToolbar extends React.Component {
+    
     render() {
         return (
             <div id="edit-toolbar">
-                <div 
+                <div>
+                <input 
+                    type="button" 
                     id='undo-button' 
-                    className="top5-button">
-                        &#x21B6;
+                   // onClick={}
+                    className="top5-button" 
+                    value="&#x21B6;"/>           
                 </div>
-                <div
+                <div > 
+                    <input 
+                    type="button" 
                     id='redo-button'
-                    className="top5-button">
-                        &#x21B7;
+                   // onClick={}
+                    className="top5-button"
+                    value="&#x21B7;"/>                    
                 </div>
-                <div
+                <div > 
+                    <input 
+                    type="button" 
                     id='close-button'
-                    className="top5-button">
-                        &#x24E7;
+                   // onClick={}
+                    className="top5-button"
+                    value="&#x24E7;"/>                 
                 </div>
             </div>
         )
