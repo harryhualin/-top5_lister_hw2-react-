@@ -35,4 +35,7 @@ export default class DBManager {
         let sessionDataString = JSON.stringify(sessionData);
         localStorage.setItem("top5-data", sessionDataString);
     }
+    deleteList=(key)=>{
+        localStorage.removeItem("top5-list-"+key);
+    }
 }

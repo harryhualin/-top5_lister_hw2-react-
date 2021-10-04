@@ -130,16 +130,11 @@ class App extends React.Component {
       this.setState(prevState => ({
         currentList: newCurrentList,
         
-    }), () => {
-        // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
-        // THE TRANSACTION STACK IS CLEARED
-       
+    }), () => {  
         this.db.mutationUpdateList(this.state.currentList);
         this.db.mutationUpdateSessionData(this.state.sessionData);
     });
-       
-         
-        
+             
     }
     // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
     loadList = (key) => {
@@ -161,15 +156,45 @@ class App extends React.Component {
             // ANY AFTER EFFECTS?
         });
     }
-    deleteList = (newKeyNamePair) => {
+    deleteList = (KeyNamePair) => {
         // SOMEHOW YOU ARE GOING TO HAVE TO FIGURE OUT
         // WHICH LIST IT IS THAT THE USER WANTS TO
         // DELETE AND MAKE THAT CONNECTION SO THAT THE
         // NAME PROPERLY DISPLAYS INSIDE THE MODAL   
         this.setState({
-            keyNamePair:newKeyNamePair
+            keyNamePair:KeyNamePair
         })
         this.showDeleteListModal();
+    }
+
+    deleteConfirm=(keyNamePair)=>{
+        this.db.deleteList(keyNamePair.key);
+        let newKeyNamePairs = [...this.state.sessionData.keyNamePairs];
+        // NOW GO THROUGH THE ARRAY AND FIND THE ONE TO RENAME
+        let index=null;
+        for (let i = 0; i < newKeyNamePairs.length; i++) {
+            if (newKeyNamePairs[i]==keyNamePair) index=i;
+        }  
+        if (newKeyNamePairs.length==1||index==0) {newKeyNamePairs.pop();}
+        else if (index) newKeyNamePairs.splice(index,1);       
+        this.sortKeyNamePairsByName(newKeyNamePairs);
+
+        // WE MAY HAVE TO RENAME THE currentList
+        let currentList = null;
+    
+        this.setState(prevState => ({
+            currentList: currentList,
+            sessionData: {
+                nextKey: prevState.sessionData.nextKey,
+                counter: prevState.sessionData.counter,
+                keyNamePairs: newKeyNamePairs
+            }
+        }), () => {
+            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
+            // THE TRANSACTION STACK IS CLEARED
+            this.db.mutationUpdateSessionData(this.state.sessionData);
+        });
+
     }
     // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
     // TO SEE IF THEY REALLY WANT TO DELETE THE LIST
@@ -207,6 +232,7 @@ class App extends React.Component {
                     currentList={this.state.currentList} />
                 <DeleteModal
                     listKeyPair={this.state.keyNamePair}
+                    deleteConfirmCallback={this.deleteConfirm}
                     hideDeleteListModalCallback={this.hideDeleteListModal}
 
                 />
