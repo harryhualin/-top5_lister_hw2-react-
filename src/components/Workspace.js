@@ -12,7 +12,9 @@ export default class Workspace extends React.Component {
     render() {
         const{currentList,
             renameItemCallback,
-            closeCurrentListCallback}=this.props;
+            closeCurrentListCallback,
+            moveItemCallback,
+        }=this.props;
         let items =[];
         if (currentList!=null)  {items=currentList.items;}  
         return (
@@ -29,9 +31,11 @@ export default class Workspace extends React.Component {
                     <div id="edit-items">
                     { items.map((item)=>( 
                         <ItemCard 
+                        currentList={this.currentList}
                         text={item}
                         index={this.getItemIndex(item)}
                         renameItemCallback={renameItemCallback}
+                        moveItemCallback={moveItemCallback}
                         />
                         ))
                        

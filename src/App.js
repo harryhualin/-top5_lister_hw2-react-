@@ -107,9 +107,7 @@ class App extends React.Component {
         });
     }
     
-    renameItem = (index,newText) => {
-      
-          
+    renameItem = (index,newText) => {  
         let newCurrentList = this.state.currentList;
             newCurrentList.items[index]= newText;
           this.setState(prevState => ({
@@ -124,6 +122,24 @@ class App extends React.Component {
             this.db.mutationUpdateList(list);
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
+    }
+    // this function move item
+    moveItem=(oldIndex,newIndex)=>{      
+        let newCurrentList = this.state.currentList;
+        newCurrentList.items.splice(newIndex, 0, newCurrentList.items.splice(oldIndex, 1)[0]);
+      this.setState(prevState => ({
+        currentList: newCurrentList,
+        
+    }), () => {
+        // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
+        // THE TRANSACTION STACK IS CLEARED
+       
+        this.db.mutationUpdateList(this.state.currentList);
+        this.db.mutationUpdateSessionData(this.state.sessionData);
+    });
+       
+         
+        
     }
     // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
     loadList = (key) => {
@@ -185,6 +201,7 @@ class App extends React.Component {
                     currentList={this.state.currentList} 
                     renameItemCallback ={this.renameItem}
                     closeCurrentListCallback={this.closeCurrentList}
+                    moveItemCallback={this.moveItem}
                     />
                 <Statusbar 
                     currentList={this.state.currentList} />

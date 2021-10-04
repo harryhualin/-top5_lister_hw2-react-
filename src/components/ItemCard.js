@@ -5,7 +5,7 @@ export default class ItemCard extends React.Component {
         super(props);
 
         this.state = {
-            text:this.props.index,
+            text:this.props.text,
             index:this.props.index,
             editActive: false,
         }
@@ -53,7 +53,8 @@ export default class ItemCard extends React.Component {
         event.target.classList.remove("top5-item-dragged-to")
         event.preventDefault();
         let data=event.dataTransfer.getData("text");
-        let oldItemIndex=0;                       
+        let oldItemIndex=data.substring("item-".length);; 
+        this.props.moveItemCallback(oldItemIndex,this.state.index)                      
     };
 render(){
         const {text,index} = this.props;    
