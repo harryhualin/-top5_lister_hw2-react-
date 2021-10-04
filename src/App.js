@@ -20,12 +20,13 @@ class App extends React.Component {
 
         // GET THE SESSION DATA FROM OUR DATA MANAGER
         let loadedSessionData = this.db.queryGetSessionData();
-
         // SETUP THE INITIAL STATE
         this.state = {
             currentList : null,
+            keyNamePair : { "key": "", "name": "" },
             sessionData : loadedSessionData
         }
+
     }
     sortKeyNamePairsByName = (keyNamePairs) => {
         keyNamePairs.sort((keyPair1, keyPair2) => {
@@ -69,6 +70,7 @@ class App extends React.Component {
             // PUTTING THIS NEW LIST IN PERMANENT STORAGE
             // IS AN AFTER EFFECT
             this.db.mutationCreateList(newList);
+            this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
     renameList = (key, newName) => {
@@ -104,6 +106,25 @@ class App extends React.Component {
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
+    
+    renameItem = (index,newText) => {
+      
+          
+        let newCurrentList = this.state.currentList;
+            newCurrentList.items[index]= newText;
+          this.setState(prevState => ({
+            currentList: newCurrentList,
+            
+        }), () => {
+            // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
+            // THE TRANSACTION STACK IS CLEARED
+            let key= this.state.currentList.key;
+            let list = this.db.queryGetList(key);
+            list.items[index] = newText;
+            this.db.mutationUpdateList(list);
+            this.db.mutationUpdateSessionData(this.state.sessionData);
+        });
+    }
     // THIS FUNCTION BEGINS THE PROCESS OF LOADING A LIST FOR EDITING
     loadList = (key) => {
         let newCurrentList = this.db.queryGetList(key);
@@ -124,11 +145,14 @@ class App extends React.Component {
             // ANY AFTER EFFECTS?
         });
     }
-    deleteList = () => {
+    deleteList = (newKeyNamePair) => {
         // SOMEHOW YOU ARE GOING TO HAVE TO FIGURE OUT
         // WHICH LIST IT IS THAT THE USER WANTS TO
         // DELETE AND MAKE THAT CONNECTION SO THAT THE
-        // NAME PROPERLY DISPLAYS INSIDE THE MODAL
+        // NAME PROPERLY DISPLAYS INSIDE THE MODAL   
+        this.setState({
+            keyNamePair:newKeyNamePair
+        })
         this.showDeleteListModal();
     }
     // THIS FUNCTION SHOWS THE MODAL FOR PROMPTING THE USER
@@ -158,11 +182,16 @@ class App extends React.Component {
                     renameListCallback={this.renameList}
                 />
                 <Workspace
-                    currentList={this.state.currentList} />
+                    currentList={this.state.currentList} 
+                    renameItemCallback ={this.renameItem}
+                    closeCurrentListCallback={this.closeCurrentList}
+                    />
                 <Statusbar 
                     currentList={this.state.currentList} />
                 <DeleteModal
+                    listKeyPair={this.state.keyNamePair}
                     hideDeleteListModalCallback={this.hideDeleteListModal}
+
                 />
             </div>
         );

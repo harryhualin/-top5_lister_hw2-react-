@@ -25,7 +25,7 @@ export default class EditToolbar extends React.Component {
                     <input 
                     type="button" 
                     id='close-button'
-                   // onClick={}
+                    onClick={this.props.close}
                     className="top5-button"
                     value="&#x24E7;"/>                 
                 </div>

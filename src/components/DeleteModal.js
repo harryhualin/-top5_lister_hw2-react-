@@ -14,12 +14,13 @@ export default class DeleteModal extends Component {
                 data-animation="slideInOutLeft">
                 <div className="modal-dialog">
                     <header className="dialog-header">
-                        Delete the {name} Top 5 List?
+                        Delete the Top 5 {name} List?
                     </header>
                     <div id="confirm-cancel-container">
                         <button
                             id="dialog-yes-button"
                             className="modal-button"
+                            //onClick={}
                         >Confirm</button>
                         <button
                             id="dialog-no-button"
