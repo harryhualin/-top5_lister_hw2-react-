@@ -75,6 +75,8 @@ class App extends React.Component {
         }), () => {
             // PUTTING THIS NEW LIST IN PERMANENT STORAGE
             // IS AN AFTER EFFECT
+            this.tps.clearAllTransactions();
+            this.updateToolbarButtons();
             this.db.mutationCreateList(newList);
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
@@ -106,6 +108,8 @@ class App extends React.Component {
         }), () => {
             // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
             // THE TRANSACTION STACK IS CLEARED
+            this.tps.clearAllTransactions();
+            this.updateToolbarButtons();
             let list = this.db.queryGetList(key);
             list.name = newName;
             this.db.mutationUpdateList(list);
@@ -117,7 +121,7 @@ class App extends React.Component {
         let oldText = this.state.currentList.items[index];
         let transaction = new ChangeItem_Transaction(this,index, oldText, newText);
         this.tps.addTransaction(transaction);
-        //this.view.updateToolbarButtons(this);
+        this.updateToolbarButtons();
     }  
 
     changeItem = (index,newText) => {  
@@ -140,16 +144,11 @@ class App extends React.Component {
     addMoveItemTransaction = (oldItemIndex, newItemIndex) => {
         let transaction = new MoveItem_Transaction(this, oldItemIndex, newItemIndex);
         this.tps.addTransaction(transaction);
-        //this.updateToolbarButtons(this);       
+        this.updateToolbarButtons();       
        
     }  
     moveItem=(oldIndex,newIndex)=>{      
         let newCurrentList = this.state.currentList;
-        //let newUndoStack=this.state.undoStack;
-        //newUndoStack.push(this.state.currentList);
-        //this.setState({
-           // undoStack:newUndoStack
-       // });
         newCurrentList.items.splice(newIndex, 0, newCurrentList.items.splice(oldIndex, 1)[0]);
         this.setState({
         currentList: newCurrentList,
@@ -166,10 +165,8 @@ class App extends React.Component {
             currentList: newCurrentList,
             sessionData: prevState.sessionData
         }), () => {
-            this.setState({
-                undoStack:[],
-                redoStack:[],
-            })
+               this.tps.clearAllTransactions();    
+                this.updateToolbarButtons(); 
         });
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
@@ -179,7 +176,8 @@ class App extends React.Component {
             listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
             sessionData: this.state.sessionData
         }), () => {
-            // ANY AFTER EFFECTS?
+            this.updateToolbarButtons(); 
+            this.tps.clearAllTransactions();
         });
     }
     deleteList = (KeyNamePair) => {
@@ -218,6 +216,8 @@ class App extends React.Component {
         }), () => {
             // AN AFTER EFFECT IS THAT WE NEED TO MAKE SURE
             // THE TRANSACTION STACK IS CLEARED
+            this.tps.clearAllTransactions();
+            this.updateToolbarButtons();
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
 
@@ -237,14 +237,46 @@ class App extends React.Component {
     undoAction=()=>{
         if (this.tps.hasTransactionToUndo()) {
             this.tps.undoTransaction();
-            //this.view.updateToolbarButtons(this);
         }
     }
     redoAction=()=>{
         if(this.tps.hasTransactionToRedo()){
             this.tps.doTransaction();
-            //this.view.updateToolbarButtons(this);
+           
         }
+    }
+    updateToolbarButtons=()=> {
+        if (!this.tps.hasTransactionToUndo()) {
+            this.disableButton("undo-button");
+        }
+        else {
+            this.enableButton("undo-button");
+        }   
+        if (!this.tps.hasTransactionToRedo()) {
+            this.disableButton("redo-button");
+        }
+        else {
+            this.enableButton("redo-button");
+        }   
+        if(this.state.currentList==null){
+            this.disableButton("close-button") 
+            this.enableButton("add-list-button");           
+        }
+        else {this.enableButton("close-button");
+            this.disableButton("add-list-button");    
+        }
+        
+    }
+  
+    disableButton=(id)=> {
+        let button = document.getElementById(id);
+        button.classList.add("disabled");
+        document.getElementById(id).disabled=true;
+    }
+    enableButton=(id)=> {
+        let button = document.getElementById(id);
+        button.classList.remove("disabled");
+        document.getElementById(id).disabled=false ;
     }
 
     render() {
@@ -261,6 +293,7 @@ class App extends React.Component {
                     deleteListCallback={this.deleteList}
                     loadListCallback={this.loadList}
                     renameListCallback={this.renameList}
+                   
                 />
                 <Workspace
                     currentList={this.state.currentList} 
@@ -268,9 +301,9 @@ class App extends React.Component {
                     closeCurrentListCallback={this.closeCurrentList}
                     redoActionCallback={this.redoAction}
                     undoActionCallback={this.undoAction}
-                    //redoStack={this.state.redoStack}
-                    //undoStack={this.state.undoStack}
-                    moveItemCallback={this.addMoveItemTransaction}
+                    moveItemCallback={this.addMoveItemTransaction} 
+                    Transaction={this.tps}
+                    updateToolbarButtons={this.updateToolbarButtons}
                     />
                 <Statusbar 
                     currentList={this.state.currentList} />

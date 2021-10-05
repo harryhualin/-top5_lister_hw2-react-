@@ -15,9 +15,9 @@ export default class Workspace extends React.Component {
             closeCurrentListCallback,
             redoActionCallback,
             undoActionCallback,
-            redoStack,
-            undoStack,
             moveItemCallback,
+            Transaction,
+            updateToolbarButtons
         }=this.props;
         let items =[];
         if (currentList!=null)  {items=currentList.items;}  
@@ -27,8 +27,8 @@ export default class Workspace extends React.Component {
                     <EditToolbar close={closeCurrentListCallback}
                                 redo={redoActionCallback}
                                 undo={undoActionCallback}
-                                redoStack={redoStack}
-                                undoStack={undoStack}
+                                tps={Transaction}
+                                updateToolbarButtons={updateToolbarButtons}
                     />                    
                     <div id="edit-numbering">
                         <div className="item-number">1.</div>
