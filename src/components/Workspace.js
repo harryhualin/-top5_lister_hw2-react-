@@ -3,6 +3,7 @@ import EditToolbar from "./EditToolbar";
 import ItemCard from "./ItemCard";
 export default class Workspace extends React.Component {
     
+    
     getItemIndex=(item)=>{
         if (this.props.currentList==null) return null;
         for(let i=0;i<=this.props.currentList.items.length;i++)
@@ -22,14 +23,14 @@ export default class Workspace extends React.Component {
         let items =[];
         if (currentList!=null)  {items=currentList.items;}  
         return (
-                <div id="top5-workspace">                 
-                <div id="workspace-edit">
+                <div id="top5-workspace" >                 
+                <div id="workspace-edit" >
                     <EditToolbar close={closeCurrentListCallback}
                                 redo={redoActionCallback}
                                 undo={undoActionCallback}
                                 tps={Transaction}
                                 updateToolbarButtons={updateToolbarButtons}
-                    />                    
+                   />                    
                     <div id="edit-numbering">
                         <div className="item-number">1.</div>
                         <div className="item-number">2.</div>

@@ -176,8 +176,8 @@ class App extends React.Component {
             listKeyPairMarkedForDeletion : prevState.listKeyPairMarkedForDeletion,
             sessionData: this.state.sessionData
         }), () => {
+            this.tps.clearAllTransactions(); 
             this.updateToolbarButtons(); 
-            this.tps.clearAllTransactions();
         });
     }
     deleteList = (KeyNamePair) => {
@@ -278,10 +278,29 @@ class App extends React.Component {
         button.classList.remove("disabled");
         document.getElementById(id).disabled=false ;
     }
-
+    handleKeyDown=(event)=>{
+        if(event.ctrlKey){
+            if(event.keyCode===90){
+                this.undoAction();
+                this.updateToolbarButtons();
+                event.preventDefault();
+            }
+            else if(event.keyCode===89){
+                this.redoAction();
+                this.updateToolbarButtons();
+                event.preventDefault();
+            }
+        }
+    }
+    componentDidMount(){
+        document.addEventListener('keydown',this.handleKeyDown);
+    }
+    componentWillUnmount(){
+        document.addEventListener('keydown',this.handleKeyDown);
+      }
     render() {
-        return (
-            <div id="app-root">
+        return (     
+            <div id="app-root"  > 
                 <Banner 
                     title='Top 5 Lister'
                     closeCallback={this.closeCurrentList} />
@@ -304,6 +323,7 @@ class App extends React.Component {
                     moveItemCallback={this.addMoveItemTransaction} 
                     Transaction={this.tps}
                     updateToolbarButtons={this.updateToolbarButtons}
+                    handleKeyDown={this.handleKeyDown}
                     />
                 <Statusbar 
                     currentList={this.state.currentList} />

@@ -8,6 +8,7 @@ export default class EditToolbar extends React.Component {
     componentDidMount(){
         this.props.updateToolbarButtons();
     }
+    
     redo=()=>{
         this.props.redo();
         this.props.updateToolbarButtons();}
@@ -18,17 +19,16 @@ export default class EditToolbar extends React.Component {
         this.props.close();
         this.props.updateToolbarButtons();}
     
+    
     render() {
         return (
-            <div id="edit-toolbar">
+            <div id="edit-toolbar" >          
                 <div>
                 <input 
                     type="button" 
                     id='undo-button' 
                     onClick={this.undo}    
-                    className="top5-button"
-                    className="disable"
-                   
+                    className="top5-button"      
                     value="&#x21B6;"/>           
                 </div>
                 <div > 
@@ -37,8 +37,6 @@ export default class EditToolbar extends React.Component {
                     id='redo-button'
                     onClick={this.redo}
                     className="top5-button"
-                    className="disable"
-                         
                     value="&#x21B7;"/>                    
                 </div>
                 <div > 
@@ -47,8 +45,6 @@ export default class EditToolbar extends React.Component {
                     id='close-button'
                     onClick={this.close}
                     className="top5-button"
-                    className="disable"
-                  
                     value="&#x24E7;"/>                 
                 </div>
                 
