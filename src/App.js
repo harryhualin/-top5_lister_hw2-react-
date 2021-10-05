@@ -3,13 +3,15 @@ import './App.css';
 
 // IMPORT DATA MANAGEMENT AND TRANSACTION STUFF
 import DBManager from './db/DBManager';
-
+import jsTPS from './db/jsTPS';
+import MoveItem_Transaction from './db/transactions/MoveItem_Transaction';
+import ChangeItem_Transaction from'./db/transactions/ChangeItem_Transaction';
 // THESE ARE OUR REACT COMPONENTS
 import DeleteModal from './components/DeleteModal';
-import Banner from './components/Banner.js'
-import Sidebar from './components/Sidebar.js'
+import Banner from './components/Banner.js';
+import Sidebar from './components/Sidebar.js';
 import Workspace from './components/Workspace.js';
-import Statusbar from './components/Statusbar.js'
+import Statusbar from './components/Statusbar.js';
 
 class App extends React.Component {
     constructor(props) {
@@ -17,13 +19,17 @@ class App extends React.Component {
 
         // THIS WILL TALK TO LOCAL STORAGE
         this.db = new DBManager();
-
+        
         // GET THE SESSION DATA FROM OUR DATA MANAGER
         let loadedSessionData = this.db.queryGetSessionData();
+        
+        this.tps = new jsTPS();
         // SETUP THE INITIAL STATE
-        this.state = {
+        this.state = {   
             currentList : null,
             keyNamePair : { "key": "", "name": "" },
+            redoStack:[[]],
+            undoStack:[[]],
             sessionData : loadedSessionData
         }
 
@@ -106,8 +112,15 @@ class App extends React.Component {
             this.db.mutationUpdateSessionData(this.state.sessionData);
         });
     }
-    
-    renameItem = (index,newText) => {  
+    addChangeItemTransaction = (index, newText) => {
+        // GET THE CURRENT TEXT
+        let oldText = this.state.currentList.items[index];
+        let transaction = new ChangeItem_Transaction(this,index, oldText, newText);
+        this.tps.addTransaction(transaction);
+        //this.view.updateToolbarButtons(this);
+    }  
+
+    changeItem = (index,newText) => {  
         let newCurrentList = this.state.currentList;
             newCurrentList.items[index]= newText;
           this.setState(prevState => ({
@@ -124,13 +137,23 @@ class App extends React.Component {
         });
     }
     // this function move item
+    addMoveItemTransaction = (oldItemIndex, newItemIndex) => {
+        let transaction = new MoveItem_Transaction(this, oldItemIndex, newItemIndex);
+        this.tps.addTransaction(transaction);
+        //this.updateToolbarButtons(this);       
+       
+    }  
     moveItem=(oldIndex,newIndex)=>{      
         let newCurrentList = this.state.currentList;
+        //let newUndoStack=this.state.undoStack;
+        //newUndoStack.push(this.state.currentList);
+        //this.setState({
+           // undoStack:newUndoStack
+       // });
         newCurrentList.items.splice(newIndex, 0, newCurrentList.items.splice(oldIndex, 1)[0]);
-      this.setState(prevState => ({
+        this.setState({
         currentList: newCurrentList,
-        
-    }), () => {  
+    }, () => {  
         this.db.mutationUpdateList(this.state.currentList);
         this.db.mutationUpdateSessionData(this.state.sessionData);
     });
@@ -143,7 +166,10 @@ class App extends React.Component {
             currentList: newCurrentList,
             sessionData: prevState.sessionData
         }), () => {
-            // ANY AFTER EFFECTS?
+            this.setState({
+                undoStack:[],
+                redoStack:[],
+            })
         });
     }
     // THIS FUNCTION BEGINS THE PROCESS OF CLOSING THE CURRENT LIST
@@ -173,9 +199,9 @@ class App extends React.Component {
         // NOW GO THROUGH THE ARRAY AND FIND THE ONE TO RENAME
         let index=null;
         for (let i = 0; i < newKeyNamePairs.length; i++) {
-            if (newKeyNamePairs[i]==keyNamePair) index=i;
+            if (newKeyNamePairs[i]===keyNamePair) index=i;
         }  
-        if (newKeyNamePairs.length==1||index==0) {newKeyNamePairs.pop();}
+        if (newKeyNamePairs.length===1||index===0) {newKeyNamePairs.shift();}
         else if (index) newKeyNamePairs.splice(index,1);       
         this.sortKeyNamePairsByName(newKeyNamePairs);
 
@@ -207,6 +233,20 @@ class App extends React.Component {
         let modal = document.getElementById("delete-modal");
         modal.classList.remove("is-visible");
     }
+
+    undoAction=()=>{
+        if (this.tps.hasTransactionToUndo()) {
+            this.tps.undoTransaction();
+            //this.view.updateToolbarButtons(this);
+        }
+    }
+    redoAction=()=>{
+        if(this.tps.hasTransactionToRedo()){
+            this.tps.doTransaction();
+            //this.view.updateToolbarButtons(this);
+        }
+    }
+
     render() {
         return (
             <div id="app-root">
@@ -224,9 +264,13 @@ class App extends React.Component {
                 />
                 <Workspace
                     currentList={this.state.currentList} 
-                    renameItemCallback ={this.renameItem}
+                    renameItemCallback ={this.addChangeItemTransaction}
                     closeCurrentListCallback={this.closeCurrentList}
-                    moveItemCallback={this.moveItem}
+                    redoActionCallback={this.redoAction}
+                    undoActionCallback={this.undoAction}
+                    //redoStack={this.state.redoStack}
+                    //undoStack={this.state.undoStack}
+                    moveItemCallback={this.addMoveItemTransaction}
                     />
                 <Statusbar 
                     currentList={this.state.currentList} />

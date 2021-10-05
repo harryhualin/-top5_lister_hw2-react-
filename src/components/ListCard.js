@@ -29,7 +29,6 @@ export default class ListCard extends React.Component {
         this.props.deleteListCallback(this.props.keyNamePair);
     }
     handleToggleEdit = (event) => {
-        
         this.setState({
             editActive: !this.state.editActive
         });
@@ -56,6 +55,7 @@ export default class ListCard extends React.Component {
         if (this.state.editActive) {
             return (
                 <input
+                    autoFocus
                     id={"list-" + keyNamePair.name}
                     className='list-card'
                     type='text'
@@ -63,6 +63,7 @@ export default class ListCard extends React.Component {
                     onBlur={this.handleBlur}
                     onChange={this.handleUpdate}
                     defaultValue={keyNamePair.name}
+                    
                 />)
         }
         else {
